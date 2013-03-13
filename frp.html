@@ -61,18 +61,50 @@
         return value;
       }
 
-      var click = Behavior("click", "#search"),
-          zipCode = Value("#zip-code"),
-          template = "%s is in %s, %s";
+      function Reaktor(reactor){
+        var value = reactor.with,
+            listener = reactor.on,
+            handler = reactor.then,
+            arg,
+            origThen;
 
-      click.then(function(){
-        promise.get("http://zip.elevenbasetwo.com/v2/US/" + extract(zipCode)).then(function(error, result){
-          result = JSON.parse(result);
-          var message =
-           sprintf(template, extract(zipCode), result.city, result.state);
-          document.querySelector("#result").innerText = message;
-        });
+        if(listener){
+          listener.then(function(){
+            arg = value ? extract(value) : arguments[1];
+            handler.call(this, arg);
+          });
+        } else {
+          // value.then(function(){ handler.call(this, extract(value)); });
+        }
+      }
+
+      Reaktor.Ajax = function(url, ajax){
+        var handler = ajax.then;
+        var reactor =
+          Reaktor({
+            on: promise.get(url),
+            then: function(result){
+              handler.call(this, JSON.parse(result));
+            }
+          });
+      }
+
+      var template = "%s is in %s, %s";
+
+      Reaktor({
+        with: Value("#zip-code"),
+        on: Behavior("click", "#search"),
+        then: function(value){
+          return Reaktor.Ajax("http://zip.elevenbasetwo.com/v2/US/" + value, {
+            then: function(result){
+              var message =
+               sprintf(template, value, result.city, result.state);
+              document.querySelector("#result").innerText = message;
+            }
+          });
+        }
       });
+
     </script>
 
   </body>
