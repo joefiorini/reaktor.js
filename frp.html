@@ -22,18 +22,33 @@
     <script type="text/javascript" src="promise.js"></script>
     <script type="text/javascript" src="sprintf.js"></script>
     <script type="text/javascript">
-      // Zip Code Lookup
-      // Enter a zip code, click search and
-      //  display details in a ul
+
+      function extract(value){
+        return value();
+      }
+
+      function Value(selector){
+        var element = document.querySelector(selector),
+            _value,
+            value = function(){
+              return _value;
+            }
+        element.addEventListener("change", function(){
+          console.log(this.value);
+          _value = this.value;
+        });
+        return value;
+      }
+
       var button = document.querySelector("#search"),
-          textField = document.querySelector("#zip-code")
+          zipCode = Value("#zip-code");
           template = "%s is in %s, %s";
 
       button.addEventListener("click", function(e){
-        promise.get("http://zip.elevenbasetwo.com/v2/US/" + textField.value).then(function(error, result){
+        promise.get("http://zip.elevenbasetwo.com/v2/US/" + extract(zipCode)).then(function(error, result){
           result = JSON.parse(result);
           var message =
-           sprintf(template, textField.value, result.city, result.state);
+           sprintf(template, extract(zipCode), result.city, result.state);
           document.querySelector("#result").innerText = message;
         });
       });
