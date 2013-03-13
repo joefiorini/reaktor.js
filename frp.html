@@ -13,20 +13,29 @@
 
     <h1>FRP</h1>
     <label>
-      Enter a zip code to search for: <br>
+      Enter a US zip code to search for: <br>
       <input name="zip-code" id="zip-code" class="mbs"><br>
       <button id="search">Search</button>
     </label>
+    <p id="result"></p>
 
+    <script type="text/javascript" src="promise.js"></script>
+    <script type="text/javascript" src="sprintf.js"></script>
     <script type="text/javascript">
       // Zip Code Lookup
       // Enter a zip code, click search and
       //  display details in a ul
       var button = document.querySelector("#search"),
-          textField = document.querySelector("#zip-code");
+          textField = document.querySelector("#zip-code")
+          template = "%s is in %s, %s";
 
       button.addEventListener("click", function(e){
-        console.log(textField.value);
+        promise.get("http://zip.elevenbasetwo.com/v2/US/" + textField.value).then(function(error, result){
+          result = JSON.parse(result);
+          var message =
+           sprintf(template, textField.value, result.city, result.state);
+          document.querySelector("#result").innerText = message;
+        });
       });
     </script>
 
