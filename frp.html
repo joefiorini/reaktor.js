@@ -18,11 +18,16 @@
       <button id="search">Search</button>
     </label>
 
-    <script type="text/javascript" src="gator.js"></script>
     <script type="text/javascript">
       // Zip Code Lookup
       // Enter a zip code, click search and
       //  display details in a ul
+      var button = document.querySelector("#search"),
+          textField = document.querySelector("#zip-code");
+
+      button.addEventListener("click", function(e){
+        console.log(textField.value);
+      });
     </script>
 
   </body>
