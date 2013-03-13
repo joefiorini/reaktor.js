@@ -27,6 +27,28 @@
         return value();
       }
 
+      function Behavior(type, selector){
+        var element = document.querySelector(selector),
+            p = new promise.Promise(),
+            origThen = p.then,
+            bindEvent = function(){
+              element.addEventListener(type, function(){
+                p.done();
+              });
+            };
+
+        p.then = function(fn){
+          origThen.call(p, function(){
+            fn.apply(this, arguments);
+            Behavior(type, selector).then(fn);
+          });
+        }
+
+        bindEvent();
+
+        return p;
+      }
+
       function Value(selector){
         var element = document.querySelector(selector),
             _value,
@@ -34,17 +56,16 @@
               return _value;
             }
         element.addEventListener("change", function(){
-          console.log(this.value);
           _value = this.value;
         });
         return value;
       }
 
-      var button = document.querySelector("#search"),
-          zipCode = Value("#zip-code");
+      var click = Behavior("click", "#search"),
+          zipCode = Value("#zip-code"),
           template = "%s is in %s, %s";
 
-      button.addEventListener("click", function(e){
+      click.then(function(){
         promise.get("http://zip.elevenbasetwo.com/v2/US/" + extract(zipCode)).then(function(error, result){
           result = JSON.parse(result);
           var message =
